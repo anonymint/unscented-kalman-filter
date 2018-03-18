@@ -11,7 +11,7 @@ Tools::~Tools() {}
 
 VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
                               const vector<VectorXd> &ground_truth) {
-  VectorXf rsme(4);
+  VectorXd rsme(4);
   rsme << 0,0,0,0;
 
   if ( estimations.size() == 0 || estimations.size() != ground_truth.size() ) {
