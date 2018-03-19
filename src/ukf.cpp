@@ -12,6 +12,9 @@ using std::vector;
  * This is scaffolding, do not modify
  */
 UKF::UKF() {
+  // check if initialize value for first time 
+  is_initialized_ = false;
+
   // if this is false, laser measurements will be ignored (except during init)
   use_laser_ = true;
 
@@ -47,6 +50,15 @@ UKF::UKF() {
   std_radrd_ = 0.3;
   //DO NOT MODIFY measurement noise values above these are provided by the sensor manufacturer.
   
+  // State dimension
+  n_x_ = 5;
+
+  // Augmented dimension
+  n_aug_ = 7;
+
+  //lambda point
+  lambda_ = 3 - n_aug_;
+
   /**
   TODO:
 
