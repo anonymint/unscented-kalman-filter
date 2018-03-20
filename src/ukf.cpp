@@ -66,6 +66,52 @@ UKF::UKF() {
 
   Hint: one or more values initialized above might be wildly off...
   */
+
+
+  //initialize x_
+  // TODO need to adjust along the way https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/c3eb3583-17b2-4d83-abf7-d852ae1b9fff/concepts/847edd7d-c6db-4475-a8ab-ffa9ab9fe985
+  // https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/daf3dee8-7117-48e8-a27a-fc4769d2b954/concepts/b9251b43-1412-4c2b-8a0b-6ef3f1eb729a
+  x_ << 1,1,1,1,1; 
+
+  //initialize P_
+  P_ << 1,0,0,0,0,
+        0,1,0,0,0,
+        0,0,1,0,0,
+        0,0,0,1,0,
+        0,0,0,0,1;
+
+  //create augmented mean vector
+  VectorXd x_aug = VectorXd(n_aug_);
+
+  //create augmented state covariance
+  MatrixXd P_aug = MatrixXd(n_aug_, n_aug_);
+
+  //create sigma point matrix
+  MatrixXd Xsig_aug = MatrixXd(n_aug_, 2 * n_aug_ + 1);  
+
+  //create augmented mean state
+  x_aug.head(5) = x_;
+  x_aug(5) = 0;
+  x_aug(6) = 0;    
+
+  //create augmented covariance matrix
+  P_aug.fill(0.0);
+  P_aug.topLeftCorner(5,5) = P_;
+  P_aug(5,5) = std_a_*std_a_;
+  P_aug(6,6) = std_yawdd_*std_yawdd_;  
+
+  //create square root matrix
+  MatrixXd L = P_aug.llt().matrixL();
+
+  //create augmebted sigma points
+  Xsig_aug.col(0)  = x_aug;
+  for (int i = 0; i< n_aug_; i++)
+  {
+    Xsig_aug.col(i+1)       = x_aug + sqrt(lambda_+n_aug_) * L.col(i);
+    Xsig_aug.col(i+1+n_aug_) = x_aug - sqrt(lambda_+n_aug_) * L.col(i);
+  }
+
+  // TODO move above logic to a method 
 }
 
 UKF::~UKF() {}
@@ -81,6 +127,53 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
   Complete this function! Make sure you switch between lidar and radar
   measurements.
   */
+
+  /*****************************************************************************
+   *  Initialization
+   * This part will be same as EKF except x_ has 5 parameters
+   ****************************************************************************/        
+
+  if (!is_initialized_) {
+    cout << "Unscented Kalman Filter:" << endl;    
+
+    if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
+      /**
+      Convert radar from polar to cartesian coordinates and initialize state.
+      */
+      float ro = meas_package.raw_measurements_[0];
+      float theta = meas_package.raw_measurements_[1];
+      float rho_dot = meas_package.raw_measurements_[2];
+      float px = ro * cos(theta);
+      float py = ro * sin(theta);
+      float vx = rho_dot * cos(theta);
+      float vy = rho_dot * sin(theta);
+      x_ << px, py, vx, vy, 0;
+    } else if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
+      x_ << meas_package.raw_measurements_[0], meas_package.raw_measurements_[1], 0, 0, 0;
+    }
+
+    time_us_ = meas_package.timestamp_;
+
+    is_initialized_ = true;
+    return;
+
+  }
+
+  /*****************************************************************************
+   *  Prediction
+   ****************************************************************************/
+  double dt = (meas_package.timestamp_ - time_us_) / 1000000.0;
+  time_us_ = meas_package.timestamp_;
+  Prediction(dt);
+
+  /*****************************************************************************
+   *  Prediction
+   ****************************************************************************/
+  if (meas_package.sensor_type_ == MeasurementPackage::LASER && use_laser_) {
+    UpdateLidar(meas_package);
+  } else if (meas_package.sensor_type_ == MeasurementPackage::RADAR && use_radar_) { 
+    UpdateRadar(meas_package);
+  }
 }
 
 /**
@@ -95,6 +188,9 @@ void UKF::Prediction(double delta_t) {
   Complete this function! Estimate the object's location. Modify the state
   vector, x_. Predict sigma points, the state, and the state covariance matrix.
   */
+
+
+
 }
 
 /**
