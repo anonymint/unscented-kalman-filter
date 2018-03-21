@@ -79,6 +79,11 @@ public:
   virtual ~UKF();
 
   /**
+   * Helper method to provide x and P 
+   */
+  void PredictMeanAndCovariance(VectorXd* x_out, MatrixXd* P_out, double delta_t);
+
+  /**
    * ProcessMeasurement
    * @param meas_package The latest measurement data of either radar or laser
    */
