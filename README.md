@@ -33,4 +33,32 @@ The purpose of this project is to measure RSME values of the calculated value of
 
 #### Result from dataset 1
 
+##### Radar only
+
+![Radar only](asset/radar_only_1.png)
+
+##### Lidar only
+
+![Lidar only](asset/lidar_only_1.png)
+
+##### Combine both Radar and Lidar
+
+![combine both Radar and Lidar](asset/lidar_radar_1.png)
+
 #### Result from dataset 2
+
+##### Radar only
+
+![Radar only](asset/radar_only_2.png)
+
+##### Lidar only
+
+![Lidar only](asset/lidar_only_2.png)
+
+##### Combine both Radar and Lidar
+
+![combine both Radar and Lidar](asset/lidar_radar_2.png)
+
+#### Results
+
+As we can see from result captured above, either Radar and Lidar can beat combined sensors as result of RSME value. In addition to that, Unscented Kalman Filter can give a better result than [Extended Kalman Filters](https://github.com/anonymint/extended-kalman-filter).
