@@ -22,7 +22,7 @@ UKF::UKF() {
   use_laser_ = true;
 
   // if this is false, radar measurements will be ignored (except during init)
-  use_radar_ = true;
+  use_radar_ = false;
 
   // initial state vector
   x_ = VectorXd(5);
@@ -31,10 +31,10 @@ UKF::UKF() {
   P_ = MatrixXd(5, 5);
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 3;
+  std_a_ = 1.5;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 0.2;
+  std_yawdd_ = 0.6;
   
   //DO NOT MODIFY measurement noise values below these are provided by the sensor manufacturer.
   // Laser measurement noise standard deviation position1 in m
@@ -74,7 +74,7 @@ UKF::UKF() {
   //initialize x_
   // TODO need to adjust along the way https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/c3eb3583-17b2-4d83-abf7-d852ae1b9fff/concepts/847edd7d-c6db-4475-a8ab-ffa9ab9fe985
   // https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/daf3dee8-7117-48e8-a27a-fc4769d2b954/concepts/b9251b43-1412-4c2b-8a0b-6ef3f1eb729a
-  x_ << 1,1,1,1,1; 
+  x_ << 1,1,0.1,0.1,0.1; 
 
   //initialize P_
   P_ << 1,0,0,0,0,
@@ -237,8 +237,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
       float rho_dot = meas_package.raw_measurements_[2];
       float px = ro * cos(theta);
       float py = ro * sin(theta);
-      float vx = rho_dot * cos(theta);
-      float vy = rho_dot * sin(theta);
+      float vx = 0; //rho_dot * cos(theta);
+      float vy = 0; //rho_dot * sin(theta);
       x_ << px, py, vx, vy, 0;
     } else if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
       x_ << meas_package.raw_measurements_[0], meas_package.raw_measurements_[1], 0, 0, 0;
@@ -351,6 +351,10 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
     double p_y = Xsig_pred_(1,i);
     double v  = Xsig_pred_(2,i);
     double yaw = Xsig_pred_(3,i);
+
+    // normalization
+    while (yaw> M_PI) yaw-=2.*M_PI;
+    while (yaw<-M_PI) yaw+=2.*M_PI;
 
     double v1 = cos(yaw)*v;
     double v2 = sin(yaw)*v;
